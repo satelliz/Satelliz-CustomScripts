@@ -1,7 +1,19 @@
 import satelliz_agent_api
-version = "0.3.beta"
+version = "0.4.beta"
 
 import re
+
+'''
+This script provide monitoring of out of low memory behavior on i368 32bit linux systems
+To deploy it - just click on "add plugin" link on your server page on Satelliz portal
+then select "Custom Script Plugin" and in "Script name" field provide following URL:
+https://raw.github.com/satelliz/Satlliz-CustomScripts/master/linux/32bit/lowmem
+
+After installation plugin you will need to tune limits for new sensor.
+Settings are in KB (so limits to set probably may be following: min_critical=30000 min_warning=50000)
+Also we recommend to set sensitivity for sensor bigger then 1 to avoid alerts during short term memory usage. 
+
+'''
 
 metric_description = {
     'LowMemStatus': {
