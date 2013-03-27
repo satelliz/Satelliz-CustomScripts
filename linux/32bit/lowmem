@@ -1,0 +1,27 @@
+import satelliz_agent_api
+version = "0.3.beta"
+
+import re
+
+metric_description = {
+    'LowMemStatus': {
+        'low_mem_total': { 'description': 'LowMem Total', 'style': 'line', 'units': 'KB', 'limits': 0},
+        'low_mem_free':  { 'description': 'LowMem Free', 'style': 'area', 'units': 'KB', 'limits': 1}
+    }}
+
+
+def get_meminfo():
+    re_parser = re.compile(r'^(?P<key>\S*):\s*(?P<value>\d*)\s*kB')
+    result = dict()
+    for line in open('/proc/meminfo'):
+        match = re_parser.match(line)
+        if not match:
+            continue # skip lines that don't parse
+        key, value = match.groups(['key', 'value'])
+        result[key] = int(value)
+    return result
+
+def main(conf):
+    mem=get_meminfo()
+
+    satelliz_agent_api.add_metric('LowMemStatus', 0, {'low_mem_total': float(mem['LowTotal']), 'low_mem_free': mem['LowFree']}, "LowMem FREE: %i KB" % mem['LowFree'], metric_description.get('LowMemStatus'))
