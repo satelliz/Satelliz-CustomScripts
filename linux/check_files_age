@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import satelliz_agent_api
 
 version = '1.0.0'
@@ -10,23 +11,17 @@ def check_age(file):
 	return age
 
 def main(config):
-	results = []
-	perfdata = {}
-	state = 0
-
+	meta = {'file_age': {'limits': 1}}
 	for x in xrange(1,9): 
 		f = config.get("param%d" % x)
 		if not f:
 			continue
 		try:
 			age = check_age(f)
-			results.append("file%d is %.1f seconds age (%s)" % (x, age, f))
-			perfdata['file%d' % x] = age
-
+			perfdata = {'file_age': age}
+			satelliz_agent_api.add_metric('File%d' % x, 0, perfdata, "%s is %.1f seconds old" % (f, age), meta)
+		except OSError, e:
+			satelliz_agent_api.add_metric('File%d' % x, 2, {}, "Problem checking %s age: %s" % (f, e))
 		except Exception, e:
-			state = 2
-			results.append("Error checking file%d %s: %r" % (x, f, e))
+			satelliz_agent_api.add_metric('File%d' % x, 2, {}, "Problem checking %s age: %r" % (f, e))
 
-	message = "\n".join(results)
-	# add metrics
-	satelliz_agent_api.add_metric('File ages', state, perfdata, message)
